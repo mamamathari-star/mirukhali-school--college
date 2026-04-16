@@ -144,13 +144,7 @@ async function main() {
     },
   ]
 
-  for (const t of teachersData) {
-    await prisma.teacher.upsert({
-      where: { phone: t.phone },
-      update: {},
-      create: t,
-    })
-  }
+  await prisma.teacher.createMany({ data: teachersData, skipDuplicates: true })
   console.log(`✅ ${teachersData.length} teachers seeded`)
 
   // ── Students ────────────────────────────────────────────────────────────────
