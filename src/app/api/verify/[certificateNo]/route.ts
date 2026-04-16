@@ -3,11 +3,12 @@ import { prisma } from '@/lib/db'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { certificateNo: string } }
+  { params }: { params: Promise<{ certificateNo: string }> }
 ) {
   try {
+    const { certificateNo } = await params
     const cert = await prisma.certificate.findUnique({
-      where: { certificateNo: params.certificateNo },
+      where: { certificateNo },
       include: { student: true, issuedBy: { select: { name: true } } },
     })
     if (!cert) return NextResponse.json({ found: false }, { status: 404 })

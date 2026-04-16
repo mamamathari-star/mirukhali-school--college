@@ -4,11 +4,12 @@ import { auth } from '@/lib/auth'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const certificate = await prisma.certificate.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         student: true,
         issuedBy: { select: { name: true } },
@@ -24,15 +25,16 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const { id } = await params
     const body = await req.json()
     const certificate = await prisma.certificate.update({
-      where: { id: params.id },
+      where: { id },
       data: { isRevoked: body.isRevoked ?? true },
     })
     return NextResponse.json({ certificate })
@@ -43,13 +45,14 @@ export async function PUT(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    await prisma.certificate.delete({ where: { id: params.id } })
+    const { id } = await params
+    await prisma.certificate.delete({ where: { id } })
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: 'Failed to delete certificate' }, { status: 500 })

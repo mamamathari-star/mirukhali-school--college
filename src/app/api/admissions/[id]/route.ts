@@ -4,13 +4,14 @@ import { auth } from '@/lib/auth'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const admission = await prisma.admission.findUnique({ where: { id: params.id } })
+    const { id } = await params
+    const admission = await prisma.admission.findUnique({ where: { id } })
     if (!admission) return NextResponse.json({ error: 'Admission not found' }, { status: 404 })
     return NextResponse.json({ admission })
   } catch {
@@ -20,15 +21,16 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const { id } = await params
     const body = await req.json()
     const admission = await prisma.admission.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: body.status },
     })
     return NextResponse.json({ admission })

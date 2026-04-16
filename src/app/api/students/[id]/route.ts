@@ -4,10 +4,11 @@ import { auth } from '@/lib/auth'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const student = await prisma.student.findUnique({ where: { id: params.id } })
+    const { id } = await params
+    const student = await prisma.student.findUnique({ where: { id } })
     if (!student) return NextResponse.json({ error: 'Student not found' }, { status: 404 })
     return NextResponse.json({ student })
   } catch {
@@ -17,15 +18,16 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const { id } = await params
     const body = await req.json()
     const student = await prisma.student.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         admissionNo: body.admissionNo,
         name: body.name,
@@ -49,13 +51,14 @@ export async function PUT(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    await prisma.student.delete({ where: { id: params.id } })
+    const { id } = await params
+    await prisma.student.delete({ where: { id } })
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: 'Failed to delete student' }, { status: 500 })
