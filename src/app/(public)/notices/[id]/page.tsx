@@ -32,9 +32,10 @@ async function getNotice(id: string): Promise<Notice | null> {
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }): Promise<Metadata> {
-  const notice = await getNotice(params.id)
+  const { id } = await params
+  const notice = await getNotice(id)
   return {
     title: notice ? `${notice.title} | ${SCHOOL_NAME}` : `Notice | ${SCHOOL_NAME}`,
     description: notice?.content?.slice(0, 160) ?? 'Notice from Mirukhali School & College.',
@@ -55,9 +56,10 @@ const categoryColors: Record<string, string> = {
 export default async function NoticeDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const notice = await getNotice(params.id)
+  const { id } = await params
+  const notice = await getNotice(id)
 
   if (!notice || !notice.isPublished) {
     notFound()
