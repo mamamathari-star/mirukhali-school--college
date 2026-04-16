@@ -47,9 +47,10 @@ const categoryColors: Record<string, string> = {
 export default async function NoticesPage({
   searchParams,
 }: {
-  searchParams: { category?: string }
+  searchParams: Promise<{ category?: string }>
 }) {
-  const activeCategory = searchParams.category || 'All'
+  const { category } = await searchParams
+  const activeCategory = category || 'All'
   const notices = await getNotices(activeCategory)
   const categories = ['All', ...NOTICE_CATEGORIES]
 
