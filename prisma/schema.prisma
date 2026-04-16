@@ -1,0 +1,202 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  TEACHER
+  STAFF
+}
+
+enum CertificateType {
+  TESTIMONIAL
+  TRANSFER
+  CHARACTER
+}
+
+enum AdmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  role         UserRole      @default(ADMIN)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  notices      Notice[]
+  certificates Certificate[]
+  teacher      Teacher?
+}
+
+model Teacher {
+  id            String   @id @default(cuid())
+  userId        String?  @unique
+  user          User?    @relation(fields: [userId], references: [id])
+  name          String
+  designation   String
+  subject       String
+  qualification String
+  joinDate      DateTime
+  photo         String?
+  phone         String
+  email         String?
+  isActive      Boolean  @default(true)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Student {
+  id            String        @id @default(cuid())
+  admissionNo   String        @unique
+  name          String
+  class         String
+  section       String?
+  roll          String?
+  fatherName    String
+  motherName    String
+  phone         String?
+  address       String
+  photo         String?
+  admissionDate DateTime
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  results       Result[]
+  certificates  Certificate[]
+}
+
+model Notice {
+  id            String    @id @default(cuid())
+  title         String
+  content       String    @db.Text
+  category      String
+  attachmentUrl String?
+  isPublished   Boolean   @default(false)
+  publishDate   DateTime?
+  createdById   String
+  createdBy     User      @relation(fields: [createdById], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Result {
+  id            String   @id @default(cuid())
+  studentId     String
+  student       Student  @relation(fields: [studentId], references: [id])
+  examName      String
+  class         String
+  section       String?
+  subject       String
+  marksObtained Float
+  totalMarks    Float
+  grade         String?
+  year          String
+  createdAt     DateTime @default(now())
+}
+
+model Certificate {
+  id              String            @id @default(cuid())
+  type            CertificateType
+  studentId       String
+  student         Student           @relation(fields: [studentId], references: [id])
+  issueDate       DateTime          @default(now())
+  certificateNo   String            @unique
+  qrCode          String?           @db.Text
+  isRevoked       Boolean           @default(false)
+  issuedById      String
+  issuedBy        User              @relation(fields: [issuedById], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  verificationLogs VerificationLog[]
+}
+
+model VerificationLog {
+  id            String      @id @default(cuid())
+  certificateId String
+  certificate   Certificate @relation(fields: [certificateId], references: [id])
+  verifiedAt    DateTime    @default(now())
+  ipAddress     String?
+  userAgent     String?     @db.Text
+}
+
+model Admission {
+  id            String          @id @default(cuid())
+  applicantName String
+  fatherName    String
+  motherName    String
+  dob           DateTime
+  gender        String
+  class         String
+  phone         String
+  address       String
+  photo         String?
+  status        AdmissionStatus @default(PENDING)
+  appliedAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Committee {
+  id          String   @id @default(cuid())
+  name        String
+  designation String
+  role        String
+  photo       String?
+  phone       String?
+  term        String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Gallery {
+  id         String   @id @default(cuid())
+  title      String
+  caption    String?
+  imageUrl   String
+  category   String   @default("General")
+  uploadedAt DateTime @default(now())
+}
+
+model Facility {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @db.Text
+  icon        String?
+  imageUrl    String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
