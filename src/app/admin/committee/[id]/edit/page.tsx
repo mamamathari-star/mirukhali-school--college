@@ -28,7 +28,7 @@ export default function EditCommitteeMemberPage({ params }: { params: { id: stri
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    fetch(`/api/committee/${params.id}`)
+    fetch(`/api/committee/${id}`)
       .then((r) => r.json())
       .then(({ member }) => {
         if (member) {
@@ -46,7 +46,7 @@ export default function EditCommitteeMemberPage({ params }: { params: { id: stri
       })
       .catch(() => setError('Failed to load member'))
       .finally(() => setFetching(false))
-  }, [params.id])
+  }, [id])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value, type } = e.target
@@ -79,7 +79,7 @@ export default function EditCommitteeMemberPage({ params }: { params: { id: stri
     setSuccess('')
     setLoading(true)
     try {
-      const res = await fetch(`/api/committee/${params.id}`, {
+      const res = await fetch(`/api/committee/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, order: parseInt(form.order) || 0 }),

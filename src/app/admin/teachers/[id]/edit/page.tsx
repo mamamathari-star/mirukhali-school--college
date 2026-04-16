@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { use, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Upload } from 'lucide-react'
@@ -39,7 +39,7 @@ export default function EditTeacherPage({ params }: { params: { id: string } }) 
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    fetch(`/api/teachers/${params.id}`)
+    fetch(`/api/teachers/${id}`)
       .then((r) => r.json())
       .then(({ teacher }) => {
         if (teacher) {
@@ -59,7 +59,7 @@ export default function EditTeacherPage({ params }: { params: { id: string } }) 
       })
       .catch(() => setError('Failed to load teacher'))
       .finally(() => setFetching(false))
-  }, [params.id])
+  }, [id])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value, type } = e.target
@@ -92,7 +92,7 @@ export default function EditTeacherPage({ params }: { params: { id: string } }) 
     setSuccess('')
     setLoading(true)
     try {
-      const res = await fetch(`/api/teachers/${params.id}`, {
+      const res = await fetch(`/api/teachers/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, order: parseInt(form.order) || 0 }),

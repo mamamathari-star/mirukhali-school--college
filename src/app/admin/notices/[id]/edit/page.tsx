@@ -31,7 +31,7 @@ export default function EditNoticePage({ params }: { params: { id: string } }) {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    fetch(`/api/notices/${params.id}`)
+    fetch(`/api/notices/${id}`)
       .then((r) => r.json())
       .then(({ notice }) => {
         if (notice) {
@@ -47,7 +47,7 @@ export default function EditNoticePage({ params }: { params: { id: string } }) {
       })
       .catch(() => setError('Failed to load notice'))
       .finally(() => setFetching(false))
-  }, [params.id])
+  }, [id])
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -65,7 +65,7 @@ export default function EditNoticePage({ params }: { params: { id: string } }) {
     setSuccess('')
     setLoading(true)
     try {
-      const res = await fetch(`/api/notices/${params.id}`, {
+      const res = await fetch(`/api/notices/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { use, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Upload } from 'lucide-react'
@@ -21,7 +21,8 @@ interface FormData {
   isActive: boolean
 }
 
-export default function EditStudentPage({ params }: { params: { id: string } }) {
+export default function EditStudentPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
   const [form, setForm] = useState<FormData>({
     admissionNo: '',
@@ -44,7 +45,7 @@ export default function EditStudentPage({ params }: { params: { id: string } }) 
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    fetch(`/api/students/${params.id}`)
+    fetch(`/api/students/${id}`)
       .then((r) => r.json())
       .then(({ student }) => {
         if (student) {
@@ -66,7 +67,7 @@ export default function EditStudentPage({ params }: { params: { id: string } }) 
       })
       .catch(() => setError('Failed to load student'))
       .finally(() => setFetching(false))
-  }, [params.id])
+  }, [id])
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -101,7 +102,7 @@ export default function EditStudentPage({ params }: { params: { id: string } }) 
     setSuccess('')
     setLoading(true)
     try {
-      const res = await fetch(`/api/students/${params.id}`, {
+      const res = await fetch(`/api/students/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
